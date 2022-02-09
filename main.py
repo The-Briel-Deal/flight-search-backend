@@ -1,4 +1,5 @@
 import firebase_admin
+import time
 from firebase_admin import db
 
 cred_obj = firebase_admin.credentials.Certificate(
@@ -8,5 +9,8 @@ cred_obj = firebase_admin.credentials.Certificate(
 default_app = firebase_admin.initialize_app(
     cred_obj, {"databaseURL": "https://reactflightsearch-default-rtdb.firebaseio.com/"}
 )
-
-print(db.reference("/").get()["notify"])
+while True:
+    time.sleep(1)
+    to_notify = db.reference("/").get()["notify"]
+    for notification in to_notify:
+        print(to_notify[notification])
