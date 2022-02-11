@@ -58,7 +58,6 @@ while True:
         fljs = json.loads(flight_info.text)
         current_price = fljs["data"][0]["price"]
         if current_price <= maxPrice:
-            print("hit")
             message = client.messages.create(
                 body=fljs["data"][0],
                 from_="+18312222233",
