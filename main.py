@@ -10,6 +10,7 @@ load_dotenv()
 
 account_sid = os.getenv("accountSID")
 auth_token = os.getenv("authToken")
+kiwi_api_key = os.getenv("kiwiAPI")
 client = Client(account_sid, auth_token)
 
 cred_obj = firebase_admin.credentials.Certificate(
@@ -30,12 +31,21 @@ while True:
         maxPrice = to_notify[notification]["maxPrice"]
         phone = to_notify[notification]["phone"]
 
-        string_to_send = (
-            f"{airportFrom}, {airportTo}, {dateFrom}, {dateTo}, {maxPrice}, {phone}"
+        flight_price = requests.get(
+            url="http://tequila-api.kiwi.com/v2/search",
+            params={
+                "fly_from": airportFrom,
+                "date_from": "17/07/2021",
+                "date_to": "17/07/2022",
+                "fly_to": airportTo,
+                "one_for_city": "1",
+                "curr": "USD",
+            },
+            headers={"apikey": kiwi_api_key},
         )
 
         message = client.messages.create(
-            body=string_to_send,
+            body=flight_price,
             from_="+18312222233",
             to="+18138416890",
         )
