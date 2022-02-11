@@ -35,8 +35,8 @@ while True:
             url="http://tequila-api.kiwi.com/v2/search",
             params={
                 "fly_from": airportFrom,
-                "date_from": "17/07/2022",
-                "date_to": "17/07/2023",
+                "date_from": dateFrom,
+                "date_to": dateTo,
                 "fly_to": airportTo,
                 "one_for_city": "1",
                 "curr": "USD",
