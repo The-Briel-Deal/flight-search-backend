@@ -5,8 +5,17 @@ from firebase_admin import db
 from twilio.rest import Client
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
+
+
+def dateConverter(date):
+    year = date[0:4]
+    month = date[5:7]
+    day = date[8:10]
+    return f"{day}/{month}/{year}"
+
 
 account_sid = os.getenv("accountSID")
 auth_token = os.getenv("authToken")
@@ -23,7 +32,7 @@ default_app = firebase_admin.initialize_app(
 while True:
     to_notify = db.reference("/").get()["notify"]
     for notification in to_notify:
-        # print(to_notify[notification])
+
         airportFrom = to_notify[notification]["airportFrom"]
         airportTo = to_notify[notification]["airportTo"]
         dateFrom = to_notify[notification]["dateFrom"]
@@ -31,7 +40,10 @@ while True:
         maxPrice = to_notify[notification]["maxPrice"]
         phone = to_notify[notification]["phone"]
 
-        flight_price = requests.get(
+        # Converting dates in place
+        dateFrom = dateConverter(dateFrom)
+        dateTo = dateConverter(dateTo)
+        flight_info = requests.get(
             url="http://tequila-api.kiwi.com/v2/search",
             params={
                 "fly_from": airportFrom,
@@ -43,10 +55,13 @@ while True:
             },
             headers={"apikey": kiwi_api_key},
         )
-        print(flight_price.text)
-        # message = client.messages.create(
-        #     body=flight_price,
-        #     from_="+18312222233",
-        #     to="+18138416890",
-        # )
+        fljs = json.loads(flight_info.text)
+        current_price = fljs["data"][0]["price"]
+        if current_price <= maxPrice:
+            print("hit")
+            message = client.messages.create(
+                body=fljs["data"][0],
+                from_="+18312222233",
+                to="+18138416890",
+            )
         time.sleep(10000)
