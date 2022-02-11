@@ -1,4 +1,5 @@
 import firebase_admin
+import requests
 import time
 from firebase_admin import db
 from twilio.rest import Client
@@ -9,7 +10,7 @@ load_dotenv()
 
 account_sid = os.getenv("accountSID")
 auth_token = os.getenv("authToken")
-print(account_sid)
+client = Client(account_sid, auth_token)
 
 cred_obj = firebase_admin.credentials.Certificate(
     "./reactflightsearch-firebase-adminsdk-7vz6q-b6c4423253.json"
@@ -19,7 +20,6 @@ default_app = firebase_admin.initialize_app(
     cred_obj, {"databaseURL": "https://reactflightsearch-default-rtdb.firebaseio.com/"}
 )
 while True:
-    time.sleep(1)
     to_notify = db.reference("/").get()["notify"]
     for notification in to_notify:
         # print(to_notify[notification])
@@ -29,3 +29,14 @@ while True:
         dateTo = to_notify[notification]["dateTo"]
         maxPrice = to_notify[notification]["maxPrice"]
         phone = to_notify[notification]["phone"]
+
+        string_to_send = (
+            f"{airportFrom}, {airportTo}, {dateFrom}, {dateTo}, {maxPrice}, {phone}"
+        )
+
+        message = client.messages.create(
+            body=string_to_send,
+            from_="+18312222233",
+            to="+18138416890",
+        )
+        time.sleep(10000)
