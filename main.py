@@ -2,11 +2,14 @@ import firebase_admin
 import time
 from firebase_admin import db
 from twilio.rest import Client
+from dotenv import load_dotenv
 import os
 
-account_sid = os.environ
-auth_token = os.environ
-print(account_sid["TWILIO_USER"])
+load_dotenv()
+
+account_sid = os.getenv("accountSID")
+auth_token = os.getenv("authToken")
+print(account_sid)
 
 cred_obj = firebase_admin.credentials.Certificate(
     "./reactflightsearch-firebase-adminsdk-7vz6q-b6c4423253.json"
