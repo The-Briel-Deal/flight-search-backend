@@ -20,6 +20,8 @@ def dateConverter(date):
 account_sid = os.getenv("accountSID")
 auth_token = os.getenv("authToken")
 kiwi_api_key = os.getenv("kiwiAPI")
+bitly_api_key = os.getenv("bitlyAPI")
+
 client = Client(account_sid, auth_token)
 
 cred_obj = firebase_admin.credentials.Certificate(
@@ -58,8 +60,30 @@ while True:
         fljs = json.loads(flight_info.text)
         current_price = fljs["data"][0]["price"]
         if current_price <= maxPrice:
+            flight_data = fljs["data"][0]
+            city_from = flight_data["cityFrom"]
+            city_to = flight_data["cityTo"]
+            deep_link = flight_data["deep_link"]
+            local_departure = dateConverter(flight_data["local_departure"])
+            local_arrival = dateConverter(flight_data["local_arrival"])
+            # print(deep_link)
+            final_link = requests.post(
+                url="https://api-ssl.bitly.com/v4/shorten",
+                data='{"long_url": "' + deep_link + '" }',
+                headers={
+                    "Authorization": f"Bearer {bitly_api_key}",
+                    "Content-Type": "application/json",
+                },
+            ).json()["link"]
+
+            message_to_send = f"""Congrats! We found a flight in your price range! Hurry and book it before it increases!\n\n
+You'll leave from: {city_from} on {local_departure}\n
+You're going to: {city_to} on {local_arrival}\n
+Book here: {final_link}
+"""
+
             message = client.messages.create(
-                body=fljs["data"][0],
+                body=message_to_send,
                 from_="+18312222233",
                 to="+18138416890",
             )
